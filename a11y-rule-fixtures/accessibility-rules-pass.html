@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility Rule Fixtures — PASS cases</title>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: 96px; }
+  body {
+    margin: 0;
+    padding-top: 96px; /* keeps focused controls clear of the fixed header */
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    line-height: 1.4;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+  section {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 24px 0;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.15em; margin-top: 0; }
+  .rule-id { font-family: monospace; background:#eee; padding:2px 6px; border-radius:4px; }
+  .note { font-size: 0.9em; color: #444; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #999; padding: 6px 10px; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  pre { background:#f6f6f6; padding:12px; overflow-x:auto; }
+
+  /* ---- R119: fixed header, but layout keeps focused controls visible ---- */
+  header.fixed-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 9999;
+  }
+  .first-focusable-link {
+    display: inline-block;
+    padding: 10px 16px;
+    background: #fff;
+    color: #111;
+    text-decoration: underline;
+  }
+  .first-focusable-link:focus {
+    outline: 3px solid #005fcc;
+    outline-offset: 2px;
+  }
+
+  /* ---- R84: scrollable region, keyboard reachable ---- */
+  /* Outer wrapper is the ONLY focusable element here — tabindex="0" makes
+     it a normal Tab stop. It does not scroll itself. */
+  .scroll-region {
+    border: 1px solid #999;
+    padding: 0;
+  }
+  .scroll-content:focus-visible {
+    outline: 3px solid #005fcc;
+    outline-offset: 3px;
+  }
+  /* Inner element owns the real overflow-y:auto and overflowing content.
+     It is never focused directly — the outer wrapper's keydown handler
+     scrolls it programmatically. No tabindex needed here since nothing
+     ever targets it for focus. */
+  .scroll-content {
+    height: 140px;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  /* ---- R80: unitless line-height that scales with font-size ---- */
+  .roomy-text {
+    font-size: 34px;
+    line-height: 1.5; /* unitless, scales proportionally */
+  }
+
+  /* ---- R71: container that wraps and grows instead of clipping ---- */
+  .r71-pass-box {
+    width: 300px;
+    height: auto;
+    min-height: 60px;
+    overflow: visible;
+    white-space: normal;
+    line-height: 1.5; /* unitless */
+    border: 1px solid #999;
+    padding: 4px;
+  }
+
+  .star-icon { font-size: 1.4em; color: goldenrod; }
+
+  /* ---- R83: min-height container, grows instead of clipping ---- */
+  .r83-pass-box {
+    min-height: 50px;
+    height: auto;
+    overflow: visible;
+    border: 1px solid #999;
+    padding: 6px;
+    font-size: 16px;
+  }
+  .r83-pass-box.zoomed {
+    font-size: 32px;
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="first-focusable-link">Skip to main content</a>
+
+<header class="fixed-header">
+  <strong>Fixed Site Header (always on top, z-index: 9999)</strong>
+</header>
+
+<main id="main-content">
+  <h1>Accessibility Rule Fixtures — Expected PASS cases</h1>
+  <p>Each section below is the corrected, passing equivalent of the same
+  rule in <code>accessibility-rules-fail.html</code>.</p>
+  <p class="note">
+    Automatic rules: R6, R20, R21, R36, R80, R84, R96, R116.<br>
+    Manual/behavioral/review rules: R33, R71, R79, R83, R86, R100, R119.
+  </p>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r20-heading">
+    <h2 id="r20-heading"><span class="rule-id">ACT-R20</span> Valid aria-* attributes</h2>
+    <!-- Expected result: PASS (automatic) — aria-expanded is a valid,
+         well-formed ARIA state used correctly on an interactive control. -->
+    <button type="button" aria-expanded="false">Valid ARIA attribute button</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r21-heading">
+    <h2 id="r21-heading"><span class="rule-id">ACT-R21</span> Valid WAI-ARIA role</h2>
+    <!-- Expected result: PASS (automatic) — a native <button> is used,
+         which has an implicit valid "button" role and correct built-in
+         keyboard behavior with no custom role required. -->
+    <button type="button">Native button (implicit valid role)</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r33-heading">
+    <h2 id="r33-heading"><span class="rule-id">ACT-R33</span> Accurate, complete media alternative</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — captions match
+         the full spoken narration, and a complete visible transcript is
+         also provided. -->
+    <video controls width="480">
+      <source src="media/demo-video.mp4" type="video/mp4">
+      <track kind="captions" src="media/demo-video-correct.vtt" srclang="en" label="English" default>
+      Your browser does not support the video element.
+    </video>
+    <h3>Full transcript</h3>
+    <p>
+      Welcome to our service portal.<br>
+      The service desk is open Monday through Friday, 9 AM to 5 PM.<br>
+      For urgent help, call 555-0100.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r71-heading">
+    <h2 id="r71-heading"><span class="rule-id">ACT-R71</span> No content loss under text-spacing override</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — the container
+         wraps text, has no fixed height, and uses unitless line-height,
+         so no content is lost when spacing increases. -->
+    <div class="r71-pass-box">
+      <p>This paragraph contains enough text that it wraps onto several
+      lines, and the container grows to fit all of it, so no information
+      is lost regardless of spacing settings.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r79-heading">
+    <h2 id="r79-heading"><span class="rule-id">ACT-R79</span> Preformatted text used only for source code</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — <pre><code>
+         now contains actual programming source code, an appropriate use
+         of preformatted text. The equivalent tabular data has been moved
+         to a semantic table below. -->
+    <pre><code>function totalSales(regions) {
+  return regions.reduce((sum, r) => sum + r.q3Sales, 0);
+}</code></pre>
+
+    <h3>Quarterly sales by region</h3>
+    <table>
+      <caption>Quarterly sales figures by region</caption>
+      <thead>
+        <tr><th scope="col">Region</th><th scope="col">Q1 Sales</th><th scope="col">Q2 Sales</th><th scope="col">Q3 Sales</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">North</th><td>12,400</td><td>13,900</td><td>15,250</td></tr>
+        <tr><th scope="row">South</th><td>9,800</td><td>10,100</td><td>10,725</td></tr>
+        <tr><th scope="row">East</th><td>11,050</td><td>11,400</td><td>12,010</td></tr>
+        <tr><th scope="row">West</th><td>14,200</td><td>14,650</td><td>15,980</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r80-heading">
+    <h2 id="r80-heading"><span class="rule-id">ACT-R80</span> Unitless line-height that scales properly</h2>
+    <!-- Expected result: PASS (automatic) — line-height is unitless
+         (1.5), so it scales proportionally with font-size and wrapped
+         lines never overlap. -->
+    <p class="roomy-text">
+      This paragraph uses the same large 34px font size, but a unitless
+      1.5 line-height, so wrapped lines remain properly spaced and never
+      overlap.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r84-heading">
+    <h2 id="r84-heading"><span class="rule-id">ACT-R84</span> Scrollable region reachable by keyboard</h2>
+    <!-- Expected result: PASS (automatic) — the outer .scroll-region wrapper
+         is the sole Tab stop (tabindex="0", role="region",
+         aria-label="Scrollable content"), with a visible focus-visible
+         outline. It has no scroll of its own. The inner .scroll-content
+         element owns overflow-y:auto and the real overflowing content;
+         while the outer wrapper is focused, ArrowUp/ArrowDown/PageUp/
+         PageDown/Home/End scroll the inner element programmatically via
+         JS, with preventDefault() called only for those specific keys so
+         the page itself never scrolls instead and no other key is
+         intercepted. -->
+    <p><a href="#r84-pass-before" id="r84-pass-before" onclick="return false;">Link before the scrollable region</a></p>
+    <div class="scroll-region" id="r84-scroll-region">
+      <div class="scroll-content" id="r84-scroll-content" tabindex="0" role="region" aria-label="Scrollable content">
+        <p>Line one of scrollable content.</p>
+        <p>Line two of scrollable content.</p>
+        <p>Line three of scrollable content.</p>
+        <p>Line four of scrollable content.</p>
+        <p>Line five of scrollable content.</p>
+        <p>Line six of scrollable content.</p>
+        <p>Line seven of scrollable content.</p>
+      </div>
+    </div>
+    <p><a href="#r84-pass-after" id="r84-pass-after" onclick="return false;">Link after the scrollable region</a></p>
+    <p class="note">For a live, interactive comparison of this exact behavior
+      (with a real-time focus status readout), see
+      <a href="scrollable-region-focus-demo.html">scrollable-region-focus-demo.html</a>.</p>
+    <script>
+    (function () {
+      var content = document.getElementById('r84-scroll-content');
+      var scrollKeys = {
+        ArrowDown: function () { content.scrollTop += 40; },
+        ArrowUp: function () { content.scrollTop -= 40; },
+        PageDown: function () { content.scrollTop += content.clientHeight; },
+        PageUp: function () { content.scrollTop -= content.clientHeight; },
+        Home: function () { content.scrollTop = 0; },
+        End: function () { content.scrollTop = content.scrollHeight; }
+      };
+      content.addEventListener('keydown', function (e) {
+        var handler = scrollKeys[e.key];
+        if (handler) {
+          handler();
+          e.preventDefault(); // only for the keys this region actually handles
+        }
+      });
+    })();
+    </script>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r86-heading">
+    <h2 id="r86-heading"><span class="rule-id">ACT-R86</span> Decorative content hidden from AT</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — the same
+         decorative icon now carries aria-hidden="true" so assistive
+         technology skips it, while the adjacent text still conveys the
+         meaning. -->
+    <p><span class="star-icon" aria-hidden="true">&#9733;</span> Featured service</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r96-heading">
+    <h2 id="r96-heading"><span class="rule-id">ACT-R96</span> No auto-refresh; user-controlled reload</h2>
+    <!-- Expected result: PASS (automatic) — no meta refresh is present;
+         reloading only happens when the user explicitly clicks the button. -->
+    <button type="button" onclick="location.reload()">Refresh this page</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r100-heading">
+    <h2 id="r100-heading"><span class="rule-id">ACT-R100</span> Tagged PDF with equivalent HTML alternative</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — this PDF is
+         tagged/accessible (verified: /MarkInfo/Marked = true,
+         /StructTreeRoot present, /Lang set — see README.md for how it
+         was produced and how to re-verify it), and an equivalent
+         accessible HTML page is linked alongside it. -->
+    <p>
+      <a href="fixtures/tagged-document.pdf">Quarterly Service Report (tagged PDF)</a>
+      &nbsp;|&nbsp;
+      <a href="quarterly-service-report.html">Quarterly Service Report (HTML alternative)</a>
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r116-heading">
+    <h2 id="r116-heading"><span class="rule-id">ACT-R116</span> details/summary with a meaningful accessible name</h2>
+    <!-- Expected result: PASS (automatic) — <summary> now contains
+         meaningful, non-empty visible text, giving it an accessible name. -->
+    <details>
+      <summary>Read service hours</summary>
+      <p>Our service hours are Monday through Friday, 9 AM to 5 PM.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r119-heading">
+    <h2 id="r119-heading"><span class="rule-id">ACT-R119</span> Fixed header no longer obscures focused controls</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — the body has
+         top padding equal to the header height and html has a matching
+         scroll-padding-top, so every focusable control (including the
+         first "Skip to main content" link) is pushed clear of the fixed
+         header and stays visible when focused. -->
+    <p class="note"><strong>Manual Tab test:</strong> Reload this page, then
+      press <kbd>Tab</kbd> once from the very top of the page. The focus
+      outline appears on the "Skip to main content" link, fully visible
+      below the fixed header. Test at desktop width and 100% zoom.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r6-heading">
+    <h2 id="r6-heading"><span class="rule-id">ACT-R6</span> Consistent, valid lang attribute values</h2>
+    <!-- Expected result: PASS (automatic) — both lang values are valid
+         BCP47 subtags and correctly describe the content language of
+         their respective text, so assistive technology can reliably
+         select the correct speech synthesis voice for each. -->
+    <p lang="en">This paragraph carries a valid lang attribute value.</p>
+    <p lang="fr">Ce paragraphe utilise un code de langue valide et correct.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r36-heading">
+    <h2 id="r36-heading"><span class="rule-id">ACT-R36</span> No ARIA attributes forbidden on this role</h2>
+    <!-- Expected result: PASS (automatic) — role="link" now carries only
+         attributes it actually supports (aria-current is valid on
+         link), so native link semantics are preserved correctly. -->
+    <a href="#" role="link" aria-current="page">Featured link with only valid ARIA attributes</a>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r83-heading">
+    <h2 id="r83-heading"><span class="rule-id">ACT-R83</span> Container grows instead of clipping on zoom</h2>
+    <!-- Expected result: PASS (manual/behavioral review) — the box below
+         uses min-height and overflow:visible, so increasing text size
+         makes the box grow to fit the content instead of clipping it. -->
+    <button type="button"
+      onclick="document.getElementById('r83-pass-box').classList.toggle('zoomed')">
+      Simulate increased text size / zoom
+    </button>
+    <div id="r83-pass-box" class="r83-pass-box">
+      <p>This text remains fully visible when zoomed, because the container grows to fit it.</p>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

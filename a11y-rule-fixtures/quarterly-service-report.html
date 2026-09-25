@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quarterly Service Report — HTML alternative</title>
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 700px;
+    margin: 24px auto;
+    padding: 0 16px;
+    line-height: 1.5;
+    color: #111;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  th, td { border: 1px solid #999; padding: 6px 10px; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+</style>
+</head>
+<body>
+<!-- This page is the required accessible HTML equivalent of
+     fixtures/tagged-document.pdf, referenced from ACT-R100's PASS case. -->
+<h1>Quarterly Service Report</h1>
+
+<h2>Service desk hours</h2>
+<p>The service desk is open Monday through Friday, 9 AM to 5 PM.
+For urgent help, call 555-0100.</p>
+
+<h2>Quarterly sales by region</h2>
+<table>
+  <caption>Quarterly sales figures by region</caption>
+  <thead>
+    <tr><th scope="col">Region</th><th scope="col">Q1 Sales</th><th scope="col">Q2 Sales</th><th scope="col">Q3 Sales</th></tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row">North</th><td>12,400</td><td>13,900</td><td>15,250</td></tr>
+    <tr><th scope="row">South</th><td>9,800</td><td>10,100</td><td>10,725</td></tr>
+    <tr><th scope="row">East</th><td>11,050</td><td>11,400</td><td>12,010</td></tr>
+    <tr><th scope="row">West</th><td>14,200</td><td>14,650</td><td>15,980</td></tr>
+  </tbody>
+</table>
+
+<p><a href="accessibility-rules-pass.html">Back to accessibility-rules-pass.html</a></p>
+</body>
+</html>

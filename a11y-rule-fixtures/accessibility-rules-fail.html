@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibility Rule Fixtures — FAIL cases</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    line-height: 1.4;
+  }
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+  section {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 24px 0;
+  }
+  h1 { font-size: 1.6em; }
+  h2 { font-size: 1.15em; margin-top: 0; }
+  .rule-id { font-family: monospace; background:#eee; padding:2px 6px; border-radius:4px; }
+  .note { font-size: 0.9em; color: #444; }
+  pre { background:#f6f6f6; padding:12px; overflow-x:auto; }
+
+  /* ---- R119: fixed header that will overlap the first focusable control ---- */
+  header.fixed-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 9999;
+  }
+  /* First focusable element on the page is placed at the exact same
+     coordinates as the fixed header, with a LOWER z-index, so it is
+     completely hidden underneath it when focused. */
+  .first-focusable-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    display: inline-block;
+    padding: 10px 16px;
+    background: #fff;
+    color: #111;
+    text-decoration: underline;
+  }
+
+  /* ---- R84: scrollable region, no keyboard access ---- */
+  /* Outer wrapper: purely visual, never scrolls itself, never focusable. */
+  .scroll-region {
+    border: 1px solid #999;
+    padding: 0;
+  }
+  /* Inner element: this is the ONLY element with real overflow-y:auto and
+     actual overflowing content. tabindex="-1" is required here — without
+     it, Chromium/Firefox/WebKit auto-include any scrollable element with
+     real overflow in the sequential Tab order even with zero tabindex
+     attributes anywhere in the DOM (a deliberate browser mitigation for
+     exactly this class of bug). tabindex="-1" explicitly opts this
+     element out of that automatic inclusion while adding nothing to the
+     Tab sequence, since -1 is never part of sequential navigation. */
+  .scroll-content {
+    height: 140px;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  /* ---- R80: fixed pixel line-height smaller than font size ---- */
+  .tight-text {
+    font-size: 34px;
+    line-height: 18px; /* fixed px, causes overlap when text wraps */
+  }
+
+  /* ---- R71: fixed-height, clipped, non-wrapping text container ---- */
+  .r71-fail-box {
+    width: 300px;
+    height: 60px;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px solid #999;
+    padding: 4px;
+  }
+  /* Scoped simulation of the WCAG 1.4.12 text-spacing override, toggled by
+     the button below, to further demonstrate loss of content on top of the
+     baseline clipping caused by white-space:nowrap + overflow:hidden. */
+  .wcag-override.override-active {
+    line-height: 1.5 !important;
+    letter-spacing: 0.12em !important;
+    word-spacing: 0.16em !important;
+  }
+  .wcag-override.override-active p {
+    margin-bottom: 2em !important;
+  }
+
+  .star-icon { font-size: 1.4em; color: goldenrod; }
+
+  /* ---- R83: fixed-height container with overflow:hidden, clips on zoom ---- */
+  .r83-fail-box {
+    height: 50px;
+    overflow: hidden;
+    border: 1px solid #999;
+    padding: 6px;
+    font-size: 16px;
+  }
+  .r83-fail-box.zoomed {
+    font-size: 32px; /* simulates a user increasing text size / zooming */
+  }
+</style>
+</head>
+<body>
+
+<!-- R119 fail fixture: first focusable element in the DOM, positioned to sit
+     directly underneath the fixed header below. -->
+<a href="#main-content" class="first-focusable-link">Skip to main content (Tab here first — will be hidden)</a>
+
+<header class="fixed-header">
+  <strong>Fixed Site Header (always on top, z-index: 9999)</strong>
+</header>
+
+<main id="main-content" style="padding-top: 96px;">
+  <h1>Accessibility Rule Fixtures — Expected FAIL cases</h1>
+  <p>Each section below intentionally violates one rule. See the HTML comment
+  above each test case for the expected scanner result.</p>
+  <p class="note">
+    Automatic rules: R6, R20, R21, R36, R80, R84, R96, R116.<br>
+    Manual/behavioral/review rules: R33, R71, R79, R83, R86, R100, R119.
+  </p>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r20-heading">
+    <h2 id="r20-heading"><span class="rule-id">ACT-R20</span> Invalid aria-* attributes</h2>
+    <!-- Expected result: FAIL (automatic) — aria-madeupstate is not a
+         defined WAI-ARIA state or property. -->
+    <button type="button" aria-madeupstate="true">Button with invalid ARIA attribute</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r21-heading">
+    <h2 id="r21-heading"><span class="rule-id">ACT-R21</span> Invalid WAI-ARIA role</h2>
+    <!-- Expected result: FAIL (automatic) — "superbutton" is not a valid
+         ARIA role value. -->
+    <div role="superbutton" tabindex="0">Focusable element with invalid role</div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r33-heading">
+    <h2 id="r33-heading"><span class="rule-id">ACT-R33</span> Inaccurate/incomplete media alternative</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — the caption
+         track below intentionally omits the spoken service-hours and
+         phone-number information. An automated scanner cannot detect
+         this; it requires a human comparing captions to audio. -->
+    <video controls width="480">
+      <source src="media/demo-video.mp4" type="video/mp4">
+      <track kind="captions" src="media/demo-video-incomplete.vtt" srclang="en" label="English (incomplete)" default>
+      Your browser does not support the video element.
+    </video>
+    <p class="note">Captions intentionally omit the service-hours and phone-number
+      sentences that are present in the spoken narration.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r71-heading">
+    <h2 id="r71-heading"><span class="rule-id">ACT-R71</span> Loss of content under text-spacing override</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — content is
+         clipped by a fixed height + overflow:hidden + white-space:nowrap
+         container even before spacing is increased, and clipping worsens
+         once the WCAG 1.4.12 override values are applied. -->
+    <button type="button"
+      onclick="document.getElementById('r71-fail-box').classList.toggle('override-active')">
+      Toggle WCAG 1.4.12 text-spacing override
+    </button>
+    <div id="r71-fail-box" class="wcag-override r71-fail-box">
+      <p>This paragraph contains enough text that it would normally wrap onto
+      several lines, but this container clips and hides any content that
+      does not fit on a single line, so information is lost.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r79-heading">
+    <h2 id="r79-heading"><span class="rule-id">ACT-R79</span> Tabular data inside &lt;pre&gt;</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — this is
+         genuinely tabular business data, not source code or an ASCII
+         figure, so it should be marked up as a semantic <table>. -->
+    <pre>
+Region      Q1 Sales   Q2 Sales   Q3 Sales
+North       12,400     13,900     15,250
+South        9,800     10,100     10,725
+East        11,050     11,400     12,010
+West        14,200     14,650     15,980
+    </pre>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r80-heading">
+    <h2 id="r80-heading"><span class="rule-id">ACT-R80</span> Fixed-pixel line-height causing overlap</h2>
+    <!-- Expected result: FAIL (automatic) — line-height is set in a fixed
+         px value smaller than the font-size, causing wrapped lines to
+         overlap when the text scales. -->
+    <p class="tight-text">
+      This paragraph uses a large 34px font size combined with a fixed
+      18px line-height, which is smaller than the font size itself, so
+      wrapped lines will visually overlap one another.
+    </p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r84-heading">
+    <h2 id="r84-heading"><span class="rule-id">ACT-R84</span> Scrollable region not keyboard reachable</h2>
+    <!-- Expected result: FAIL (automatic) — the outer .scroll-region wrapper
+         is purely visual (no scroll, no tabindex). The inner
+         .scroll-content element owns the real overflow-y:auto and
+         overflowing content, but carries tabindex="-1" so it is never
+         part of sequential Tab navigation. No element in this component
+         is Tab-reachable, so a keyboard-only user cannot discover or
+         scroll this region at all — Tab goes straight from the link
+         before it to the link after it. -->
+    <p><a href="#r84-fail-before" id="r84-fail-before" onclick="return false;">Link before the scrollable region</a></p>
+    <div class="scroll-region">
+      <div class="scroll-content" tabindex="-1">
+        <p>Line one of scrollable content.</p>
+        <p>Line two of scrollable content.</p>
+        <p>Line three of scrollable content.</p>
+        <p>Line four of scrollable content.</p>
+        <p>Line five of scrollable content.</p>
+        <p>Line six of scrollable content.</p>
+        <p>Line seven of scrollable content.</p>
+      </div>
+    </div>
+    <p><a href="#r84-fail-after" id="r84-fail-after" onclick="return false;">Link after the scrollable region</a></p>
+    <p class="note">For a live, interactive comparison of this exact behavior
+      (with a real-time focus status readout), see
+      <a href="scrollable-region-focus-demo.html">scrollable-region-focus-demo.html</a>.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r86-heading">
+    <h2 id="r86-heading"><span class="rule-id">ACT-R86</span> Decorative content not hidden from AT</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — this icon is
+         purely decorative (it repeats the adjacent visible text) but is
+         exposed to assistive technology because it lacks aria-hidden="true". -->
+    <p><span class="star-icon">&#9733;</span> Featured service</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r96-heading">
+    <h2 id="r96-heading"><span class="rule-id">ACT-R96</span> Auto-refresh without user control</h2>
+    <!-- Expected result: FAIL (automatic) — meta refresh reloads the page
+         automatically with no way for the user to disable it. -->
+    <meta http-equiv="refresh" content="60">
+    <p>This page will automatically refresh every 60 seconds with no user control.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r100-heading">
+    <h2 id="r100-heading"><span class="rule-id">ACT-R100</span> Untagged/inaccessible PDF with no HTML alternative</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — this PDF is
+         untagged (verified: no /MarkInfo, no /StructTreeRoot) and no
+         equivalent accessible HTML page is linked nearby. -->
+    <p><a href="fixtures/untagged-document.pdf">Quarterly Service Report (PDF)</a></p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r116-heading">
+    <h2 id="r116-heading"><span class="rule-id">ACT-R116</span> details/summary with no accessible name</h2>
+    <!-- Expected result: FAIL (automatic) — the <summary> element is
+         present but empty, so it has no accessible name. -->
+    <details>
+      <summary></summary>
+      <p>Our service hours are Monday through Friday, 9 AM to 5 PM.</p>
+    </details>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r119-heading">
+    <h2 id="r119-heading"><span class="rule-id">ACT-R119</span> Fixed header completely obscures focused control</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — the very first
+         focusable element on this page (the "Skip to main content" link
+         near the top of the document, before the header) is positioned
+         directly beneath the fixed header and has a lower z-index, so
+         when it receives keyboard focus it is completely hidden. -->
+    <p class="note"><strong>Manual Tab test:</strong> Reload this page, then
+      press <kbd>Tab</kbd> once from the very top of the page. The browser's
+      focus outline appears in the top-left corner, but it is completely
+      covered by the dark fixed header above — the focused link is not
+      visible. Test at desktop width and 100% zoom.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r6-heading">
+    <h2 id="r6-heading"><span class="rule-id">ACT-R6</span> Inconsistent/invalid lang attribute values</h2>
+    <!-- Expected result: FAIL (automatic) — "engrish" is not a valid
+         BCP47 language subtag, and it also conflicts with the page's
+         real content language (English), so assistive technology
+         cannot reliably select the correct speech synthesis voice. -->
+    <p lang="engrish">This paragraph carries an invalid lang attribute value.</p>
+    <p lang="fr-QQ-typo">Ce paragraphe combine un code de langue valide avec une région inventée et invalide.</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r36-heading">
+    <h2 id="r36-heading"><span class="rule-id">ACT-R36</span> ARIA attribute forbidden on this role</h2>
+    <!-- Expected result: FAIL (automatic) — aria-selected is only valid
+         on roles that support a selected state (e.g. option, tab, row,
+         gridcell). role="link" does not support aria-selected, so this
+         attribute is explicitly forbidden here and overrides native
+         link semantics incorrectly. -->
+    <a href="#" role="link" aria-selected="true">Featured link with a forbidden ARIA attribute</a>
+  </section>
+
+  <!-- ============================================================ -->
+  <section aria-labelledby="r83-heading">
+    <h2 id="r83-heading"><span class="rule-id">ACT-R83</span> Fixed-height container clips content on zoom</h2>
+    <!-- Expected result: FAIL (manual/behavioral review) — the box below
+         has a fixed pixel height and overflow:hidden, so increasing text
+         size clips content instead of the box growing to fit it. -->
+    <button type="button"
+      onclick="document.getElementById('r83-fail-box').classList.toggle('zoomed')">
+      Simulate increased text size / zoom
+    </button>
+    <div id="r83-fail-box" class="r83-fail-box">
+      <p>This text will be clipped once the container is zoomed, because the box height is fixed.</p>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

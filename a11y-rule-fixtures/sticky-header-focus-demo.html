@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACT-R119 — Interactive sticky-header focus demo</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #111;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 16px 400px;
+  }
+  h1 { font-size: 1.4em; }
+  .intro {
+    background: #fff8e1;
+    border: 1px solid #e6c200;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .controls {
+    position: sticky;
+    top: 0;
+    background: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    z-index: 5; /* below the demo header so it doesn't fight the fixture */
+  }
+  .controls label { font-weight: bold; cursor: pointer; }
+
+  /* ---- The element under test: a sticky/fixed header ---- */
+  .demo-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 72px;
+    background: #222;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    z-index: 9999;
+  }
+  main { padding-top: 96px; padding-bottom: 116px; }
+
+  .item {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .item a, .item button {
+    font-size: 1em;
+  }
+
+  /* BROKEN mode (default): nothing prevents the browser's native
+     scroll-into-view from parking a focused element right at the very
+     top of the viewport, underneath the fixed header. */
+
+  /* FIXED mode: applied to <html> when the toggle is checked. This is
+     the real WCAG technique — scroll-margin-top / scroll-padding-top
+     reserves space so the browser's native focus-scroll never places
+     a focused element under the sticky header. */
+  html.fix-applied {
+    scroll-padding-top: 88px;
+    scroll-padding-bottom: 116px;
+  }
+  html.fix-applied .item a,
+  html.fix-applied .item button {
+    scroll-margin-top: 88px;
+    scroll-margin-bottom: 116px;
+  }
+
+  /* ---- Sticky bottom action bar (fixed, like the header, so it can
+     genuinely obscure a focused item scrolled underneath it) ---- */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    background: #eeeeee;
+    border-top: 1px solid #ccc;
+    padding: 0 24px;
+    z-index: 9999;
+  }
+  .bottom-bar button {
+    flex: 1 1 0;
+    max-width: 100%;
+    padding: 22px 0;
+    font-size: 1.4em;
+    font-weight: 600;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .bottom-bar button:hover {
+    background: #222;
+  }
+  .bottom-bar button:focus-visible {
+    outline: 3px solid #005fcc;
+    outline-offset: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-header" role="banner">
+  <strong>Sticky demo header (always on top)</strong>
+</div>
+
+<main>
+  <h1>ACT-R119 interactive demo: does the sticky header hide keyboard focus?</h1>
+
+  <div class="intro">
+    <p>This page has its own fixed header (above) independent of the two
+    Focus Inspector fixtures. Tab through the numbered links below. On a
+    long page like this, browsers automatically scroll a newly focused
+    element into view — and by default that can park it flush against
+    the very top of the viewport, directly under a fixed header.</p>
+    <p>Use the toggle below to compare the broken behavior against the
+    WCAG 2.4.11 (Focus Not Obscured) fix, live, without reloading.</p>
+  </div>
+
+  <div class="controls">
+    <label>
+      <input type="checkbox" id="fix-toggle">
+      Apply WCAG fix (scroll-margin-top / scroll-padding-top)
+    </label>
+    <div style="font-size:0.85em;color:#555;margin-top:6px;">
+      Unchecked = reproduces the bug. Checked = the corrected behavior.
+    </div>
+  </div>
+
+  <!-- Focus Inspector panel, same script pattern as the other two
+       fixture pages, adjusted to watch .demo-header instead of
+       .fixed-header. -->
+  <div id="focus-inspector" aria-hidden="true"></div>
+
+  <p>Start tabbing from the checkbox above through each item below and
+  watch the Focus Inspector panel in the corner.</p>
+
+  <div class="item"><a href="#" onclick="return false;">Item 1 — Account settings</a></div>
+  <div class="item"><a href="#" onclick="return false;">Item 2 — Notification preferences</a></div>
+  <div class="item"><a href="#" onclick="return false;">Item 3 — Billing details</a></div>
+  <div class="item"><button type="button">Item 4 — Update payment method</button></div>
+  <div class="item"><a href="#" onclick="return false;">Item 5 — Connected devices</a></div>
+  <div class="item"><a href="#" onclick="return false;">Item 6 — Privacy controls</a></div>
+  <div class="item"><button type="button">Item 7 — Download my data</button></div>
+  <div class="item"><a href="#" onclick="return false;">Item 8 — Two-factor authentication</a></div>
+  <div class="item"><a href="#" onclick="return false;">Item 9 — Linked accounts</a></div>
+  <div class="item"><button type="button">Item 10 — Deactivate account</button></div>
+
+  <p style="margin-top:24px;color:#555;font-size:0.9em;">
+    End of list. Shift+Tab back up through the items with the fix
+    switched on and off to compare.
+  </p>
+</main>
+
+<div class="bottom-bar">
+  <button type="button" id="accept-btn">Accept</button>
+  <button type="button" id="reject-btn">Reject</button>
+</div>
+
+<script>
+(function () {
+  var toggle = document.getElementById('fix-toggle');
+  toggle.addEventListener('change', function () {
+    document.documentElement.classList.toggle('fix-applied', toggle.checked);
+  });
+
+  var panel = document.getElementById('focus-inspector');
+  Object.assign(panel.style, {
+    position: 'fixed', bottom: '12px', right: '12px', zIndex: 2147483647,
+    background: '#111', color: '#fff', font: '13px/1.5 monospace',
+    padding: '10px 12px', borderRadius: '6px', maxWidth: '320px',
+    boxShadow: '0 2px 12px rgba(0,0,0,.4)', pointerEvents: 'none'
+  });
+  panel.textContent = 'Focus Inspector: press Tab to begin (this box does not receive focus)';
+
+  function describe(el) {
+    if (!el || el === document.body) return 'none (focus left the page controls)';
+    var label = (el.getAttribute('aria-label') || el.textContent || el.value || '').trim().slice(0, 44);
+    return '<' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + '> ' + (label ? '"' + label + '"' : '(no visible text)');
+  }
+
+  function overlapsFixedEl(rect, fixedEl) {
+    if (!fixedEl) return false;
+    var fRect = fixedEl.getBoundingClientRect();
+    if (fRect.width === 0 && fRect.height === 0) return false;
+    var overlapTop = Math.max(rect.top, fRect.top);
+    var overlapBottom = Math.min(rect.bottom, fRect.bottom);
+    var overlapHeight = Math.max(0, overlapBottom - overlapTop);
+    return overlapHeight >= (rect.height * 0.6);
+  }
+
+  function isObscured(el) {
+    var rect = el.getBoundingClientRect();
+    if (rect.width === 0) return false;
+    var header = document.querySelector('.demo-header');
+    var bottomBar = document.querySelector('.bottom-bar');
+    return overlapsFixedEl(rect, header) || overlapsFixedEl(rect, bottomBar);
+  }
+
+  document.addEventListener('focusin', function (e) {
+    var el = e.target;
+    if (el === panel) return;
+    var isBarButton = !!el.closest('.bottom-bar');
+    var obscured = isBarButton ? false : isObscured(el);
+    panel.innerHTML = 'Focused: ' + describe(el) +
+      '<br>Visible: ' + (obscured
+        ? '<strong style="color:#ff6b6b">NO &mdash; hidden behind sticky header</strong>'
+        : '<strong style="color:#7CFC98">YES</strong>') +
+      '<br>Fix applied: ' + (toggle.checked ? 'YES' : 'NO');
+  });
+})();
+</script>
+
+</body>
+</html>
